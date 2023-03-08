@@ -1,14 +1,12 @@
 'use client';
 
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
-import styles from './page.module.scss'
+// import { Inter } from 'next/font/google'
 
 import * as React from "react";
 import * as d3 from "d3";
 
-import io from 'socket.io-client'
-let socket
+// import io from 'socket.io-client'
+// let socket
 
 function drawChart(svgRef: React.RefObject<SVGSVGElement>, inputData: string) {
   if (!inputData) return null;
@@ -52,8 +50,6 @@ function drawChart(svgRef: React.RefObject<SVGSVGElement>, inputData: string) {
   .y(d => y(d.value))
 
   let color = d3.scaleSequential(y.domain(), d3.interpolateTurbo)
-
-  // console.log(d3.select('#chart'));
 
   svg
     .attr("width", width)
@@ -121,7 +117,7 @@ const Chart: React.FunctionComponent = () => {
           .then((res) => res.text())
           .then((res) => {
             setData(prevData => {
-              console.log(`${prevData}${res}`);
+              // console.log(`${prevData}${res}`);
               return `${prevData}${res}`
             })
           })

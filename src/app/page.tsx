@@ -1,6 +1,4 @@
-import Image from 'next/image'
 import { Inter } from 'next/font/google'
-// import styles from './page.module.scss'
 import Chart from './Chart'
 import * as React from 'react'
 
