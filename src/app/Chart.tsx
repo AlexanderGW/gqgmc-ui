@@ -11,7 +11,7 @@ import * as d3 from "d3";
 function drawChart(svgRef: React.RefObject<SVGSVGElement>, inputData: string) {
   if (!inputData) return null;
 
-  const height = 500;
+  const height = 800;
   const width = 800;
   const svg = d3.select(svgRef.current);
   const margin = ({top: 40, right: 40, bottom: 40, left: 60})
@@ -65,6 +65,34 @@ function drawChart(svgRef: React.RefObject<SVGSVGElement>, inputData: string) {
   svg.append("g")
     .call(yAxis);
 
+  // var defs = svg.append("defs");
+
+//   var gradient = defs.append("linearGradient")
+// .attr("id", "svgGradient")
+// .attr("x1", "0%")
+// .attr("x2", "100%")
+// .attr("y1", "0%")
+// .attr("y2", "100%");
+
+// gradient.append("stop")
+// .attr(‘class’, ‘start’)
+// .attr("offset", "0%")
+// .attr("stop-color", "red")
+// .attr("stop-opacity", 1);
+
+// gradient.append("stop")
+// .attr(‘class’, ‘end’)
+// .attr("offset", "100%")
+// .attr("stop-color", "blue")
+// .attr("stop-opacity", 1);
+
+// var line = svg.append("path")
+// .attr("d", function () { … } )
+// .attr("stroke", "url(#svgGradient)")
+// .attr("fill", "none");
+  
+  d3.selectAll('linearGradient').remove()
+
   svg.append("linearGradient")
       .attr("id", "line-gradient")
       .attr("gradientUnits", "userSpaceOnUse")
@@ -78,7 +106,7 @@ function drawChart(svgRef: React.RefObject<SVGSVGElement>, inputData: string) {
       .attr("offset", d => d)
       .attr("stop-color", color.interpolator());
 
-  // d3.selectAll('path').remove()
+  d3.selectAll('path').remove()
 
   svg.append("path")
       .datum(data)
@@ -108,20 +136,21 @@ const Chart: React.FunctionComponent = () => {
     fetch('/api/feed')
       .then((res) => res.text())
       .then((res) => {
+        // initChart(svg);
         setData(res)
         setLoading(false)
       })
 
-      interval = setInterval(() => {
-        fetch('/api/feed')
-          .then((res) => res.text())
-          .then((res) => {
-            setData(prevData => {
-              // console.log(`${prevData}${res}`);
-              return `${prevData}${res}`
-            })
+    interval = setInterval(() => {
+      fetch('/api/feed')
+        .then((res) => res.text())
+        .then((res) => {
+          setData(prevData => {
+            // console.log(`${prevData}${res}`);
+            return `${prevData}${res}`
           })
-      }, 2000);
+        })
+    }, 2000);
   }, [])
 
   React.useEffect(() => {
