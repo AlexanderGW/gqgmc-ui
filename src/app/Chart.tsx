@@ -12,38 +12,19 @@ let socket
 
 function drawChart(svgRef: React.RefObject<SVGSVGElement>, inputData: string) {
   if (!inputData) return null;
-  // const dataOrig = [12, 5, 6, 6, 9, 10];
+
   const height = 500;
   const width = 800;
   const svg = d3.select(svgRef.current);
-
-  // let gradient = document.createElement('dev');
-  // gradient.setAttribute('id', 'gradient');
-
   const margin = ({top: 40, right: 40, bottom: 40, left: 60})
+  const inputDataParsed = d3.csvParse(inputData, d3.autoType);
 
-  // console.log(`inputData: ${inputData?.length}`);
-
-  // const csvData = "date,value\n";
-  // const csvData = "date,value\n2023-03-05T00:00:00,CPM:18\n2023-03-05T00:00:01,CPM:36\n2023-03-05T00:00:02,CPM:100";
-  // const csvData = "date,value\n2023-03-05T00:00:00; CPM:18\n2023-03-05T00:00:01; CPM:36\n2023-03-05T00:00:02; CPM:100";
-
-  // const psv = d3.dsvFormat("; ");
-  // const tmpData = psv.parse(inputData);
-
-  const tmpData = d3.csvParse(inputData, d3.autoType);
-  // console.log(tmpData);
-
-  let data = Object.assign(tmpData.map(({date, value}) => {
+  let data = Object.assign(inputDataParsed.map(({date, value}) => {
     return {
       date: date,//date.toString().indexOf('+') >= 0 ? date.toString().split('+').shift() : date,
       value: value ? parseInt(value.split(':').pop()) : 0
     }
   }), {title: "Counts per minute CPM", y: " CPM"})
-
-  // console.log(d3.csvParse(csvData, d3.autoType));
-  // console.log(d3.csvParse(csvData, d3.autoType).map(({date, value}) => ({date, value: value})));
-  console.log(data);
 
   let x = d3.scaleUtc()
   .domain(d3.extent(data, d => new Date(d.date)))
@@ -52,8 +33,6 @@ function drawChart(svgRef: React.RefObject<SVGSVGElement>, inputData: string) {
   let y = d3.scaleLinear()
   .domain(d3.extent(data, d => d.value)).nice()
   .range([height - margin.bottom, margin.top])
-
-  // let color = d3.scaleSequential(y.domain(), d3.interpolateTurbo)
 
   const xAxis = g => g
   .attr("transform", `translate(0,${height - margin.bottom})`)
@@ -74,11 +53,15 @@ function drawChart(svgRef: React.RefObject<SVGSVGElement>, inputData: string) {
 
   let color = d3.scaleSequential(y.domain(), d3.interpolateTurbo)
 
+  // console.log(d3.select('#chart'));
+
   svg
     .attr("width", width)
     .attr("height", height)
     .style("margin-top", 50)
     .style("margin-left", 50);
+
+    d3.selectAll('g').remove()
 
   svg.append("g")
     .call(xAxis);
@@ -109,6 +92,11 @@ function drawChart(svgRef: React.RefObject<SVGSVGElement>, inputData: string) {
       .attr("stroke-linejoin", "round")
       .attr("stroke-linecap", "round")
       .attr("d", line);
+
+  // svg.selectAll("path")
+  // .enter()
+  // .data(data)
+  // .exit()
 }
 
 // const inter = Inter({ subsets: ['latin'] })
@@ -116,31 +104,33 @@ function drawChart(svgRef: React.RefObject<SVGSVGElement>, inputData: string) {
 const Chart: React.FunctionComponent = () => {
   const svg = React.useRef<SVGSVGElement>(null);
 
+  let interval = null;
   const [data, setData] = React.useState('')
-  const [isLoading, setLoading] = React.useState(false)
+  const [isLoading, setLoading] = React.useState(true)
 
   React.useEffect(() => {
-    setLoading(true)
-    fetch('/api/prime')
+    fetch('/api/feed')
       .then((res) => res.text())
       .then((res) => {
         setData(res)
         setLoading(false)
       })
+
+      interval = setInterval(() => {
+        fetch('/api/feed')
+          .then((res) => res.text())
+          .then((res) => {
+            setData(prevData => {
+              console.log(`${prevData}${res}`);
+              return `${prevData}${res}`
+            })
+          })
+      }, 2000);
   }, [])
 
   React.useEffect(() => {
     drawChart(svg, data);
   }, [data]);
-
-  // setTimeout(() => {
-  //   fetch('/api/feed')
-  //     .then((res) => res.text())
-  //     .then((res) => {
-  //       const newData = `${data}${res}`
-  //       setData(newData)
-  //     })
-  // }, 1000);
 
   // React.useEffect(() => socketInitializer(), [])
 
